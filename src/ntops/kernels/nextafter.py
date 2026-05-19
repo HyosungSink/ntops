@@ -21,10 +21,19 @@ def broadcast_2d_arrangement(input, other, output, block_size=None):
 
 
 def application(input, other, output):
-    value = libdevice.nextafter(input, other)
+    bits = ntl.cast(input, ntl.uint32, bitcast=True)
+    next_bits = ntl.where(
+        ntl.where(input > 0, other > input, other < input),
+        bits + 1,
+        bits - 1,
+    )
+    next_bits = ntl.cast(next_bits, ntl.uint32)
+    value = ntl.cast(next_bits, ntl.float32, bitcast=True)
     zero_value = ntl.where(other < 0, -1.401298464324817e-45, 1.401298464324817e-45)
     zero_value = ntl.where(other == 0, other, zero_value)
     value = ntl.where(input == 0, zero_value, value)
+    value = ntl.where(input == other, other, value)
+    value = ntl.where(input != input, input, value)
     output = ntl.where(other != other, other, value)  # noqa: F841
 
 
@@ -37,12 +46,15 @@ def double_application(input, other, output):
 
 
 def half_application(input, other, output):
+    input = ntl.cast(input, ntl.float16)
+    other = ntl.cast(other, ntl.float16)
     bits = ntl.cast(input, ntl.uint16, bitcast=True)
     next_bits = ntl.where(
         ntl.where(input > 0, other > input, other < input),
         bits + 1,
         bits - 1,
     )
+    next_bits = ntl.cast(next_bits, ntl.uint16)
     next_value = ntl.cast(next_bits, ntl.float16, bitcast=True)
     zero_value = ntl.where(other < 0, -5.960464477539063e-08, 5.960464477539063e-08)
     zero_value = ntl.where(other == 0, other, zero_value)

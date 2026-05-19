@@ -35,7 +35,18 @@ def _gcd_parts(input, other, iterations):
 
 
 def _apply_lcm(input, other, output, iterations):
-    x, y, gcd = _gcd_parts(input, other, iterations)
+    x = ntl.abs(input)
+    y = ntl.abs(other)
+    a = x
+    b = y
+
+    for _ in range(iterations):
+        safe_b = ntl.where(b == 0, 1, b)
+        r = a % safe_b
+        a = ntl.where(b == 0, a, b)
+        b = ntl.where(b == 0, b, r)
+
+    gcd = a
     safe_gcd = ntl.where(gcd == 0, 1, gcd)
     value = (x // safe_gcd) * y
     input_min = (input < 0) & (-input == input)
@@ -47,7 +58,18 @@ def _apply_lcm(input, other, output, iterations):
 
 
 def _apply_lcm_abs(input, other, output, iterations):
-    x, y, gcd = _gcd_parts(input, other, iterations)
+    x = ntl.abs(input)
+    y = ntl.abs(other)
+    a = x
+    b = y
+
+    for _ in range(iterations):
+        safe_b = ntl.where(b == 0, 1, b)
+        r = a % safe_b
+        a = ntl.where(b == 0, a, b)
+        b = ntl.where(b == 0, b, r)
+
+    gcd = a
     safe_gcd = ntl.where(gcd == 0, 1, gcd)
     value = ntl.abs((x // safe_gcd) * y)
     input_min = (input < 0) & (-input == input)
